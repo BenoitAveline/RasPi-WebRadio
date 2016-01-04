@@ -62,8 +62,6 @@ def main():
 	GPIO.setup(LCD_D6, GPIO.OUT) # DB6
 	GPIO.setup(LCD_D7, GPIO.OUT) # DB7
 	
-	GPIO.setup(NEXT, GPIO.IN) # Next Channel button
-	GPIO.setup(PREV, GPIO.IN) # Previous Channel button
 	
 	# Initialise display
 	lcd_init()
@@ -80,29 +78,32 @@ def main():
 	currentTrack = 5
 	currentName = ["Error","OuiFM  ","FIP  ","France Inter  ","France Culture  "]
 	os.system("mpc play %d" % (currentTrack, ))
+		
+	
+	# Next Button
+	def nextButton(channel):
+		currentTrack = currentTrack + 1
+		if ( currentTrack >= 6 ):
+			currentTrack = 1
+		if ( currentTrack == 5 ):
+			os.system("mpc stop")
+		else:
+			os.system("mpc play %d" % (currentTrack, ))
+			
+	# Prev Button
+	def prevButton(channel):
+		currentTrack = currentTrack - 1
+		if ( currentTrack <= 0 ):
+			currentTrack = 5
+		if ( currentTrack == 5 ):
+			os.system("mpc stop")
+		else:
+			os.system("mpc play %d" % (currentTrack, ))
+			
+	GPIO.add_event_detect(NEXT, GPIO.FALLING, callback=nextButton)
+	GPIO.add_event_detect(PREV, GPIO.FALLING, callback=prevButton)
 	time.sleep(1)
 	while 1:
-		
-		
-		if ( GPIO.input(NEXT) == False):
-			currentTrack = currentTrack + 1
-			if ( currentTrack >= 6 ):
-				currentTrack = 1
-			if ( currentTrack == 5 ):
-				os.system("mpc stop")
-			else:
-				os.system("mpc play %d" % (currentTrack, ))
-		
-		
-		if ( GPIO.input(PREV) == False):
-			currentTrack = currentTrack - 1
-			if ( currentTrack <= 0 ):
-				currentTrack = 5
-			if ( currentTrack == 5 ):
-				os.system("mpc stop")
-			else:
-				os.system("mpc play %d" % (currentTrack, ))
-		
 		
 		# Send some text
 		if ( currentTrack == 1 ):
@@ -161,25 +162,10 @@ def main():
 			lcd_string("     ",3)
 		
 		time.sleep(0.2) 
+	
+	GPIO.cleanup()
 		
 		
-#		f=os.popen("mpc current")
-#		station = ""
-#		for i in f.readlines():
-#			station += i
-#		
-#		
-#		
-#		# Send some text
-#		lcd_byte(LCD_LINE_1, LCD_CMD)
-#		lcd_string(datetime.datetime.now().strftime('%H:%M '),2)
-#		lcd_byte(LCD_LINE_2, LCD_CMD)
-#		lcd_string("",2)
-#		lcd_byte(LCD_LINE_3, LCD_CMD)
-#		lcd_string("",1)
-#		lcd_byte(LCD_LINE_4, LCD_CMD)
-#		lcd_string(currentName[currentTrack],1)
-#		time.sleep(1) 
 	
 	
 time.sleep(20)
